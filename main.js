@@ -26,32 +26,52 @@ class Calculator {
     }
 
     deleteLastChar() {
+        if (this.display.innerHTML.includes('-') && this.display.innerHTML.length <= 2) {
+            this.clearDisplay();
+        }
+
         if (!this.x) {
             this.display.innerHTML = this.display.innerHTML.slice(0, -1);
-        } else if (!this.afterSetAction&& this.display.innerHTML) {
+        } else if (!this.afterSetAction && this.display.innerHTML) {
             this.display.innerHTML = this.display.innerHTML.slice(0, -1);
         }
     }
 
     setNumber(number) {
-        if (this.x && this.action && this.afterSetAction) {
+        if (this.display.innerHTML == 'Error') {
             this.clearDisplay();
+        }
+        
+        if (this.x && this.action && this.afterSetAction) {
+            if (number != '.' && number != '+/-') {
+                this.clearDisplay();
+                this.showChar(number);
+                this.afterSetAction = false;
+            }
+        // setting +/-
+        } else if (number == '+/-' && this.display.innerHTML) {
+            if (!this.display.innerHTML.includes('-')) {
+                this.display.innerHTML = '-' + this.display.innerHTML;
+            } else {
+                this.display.innerHTML = this.display.innerHTML.slice(1);
+            }
+        // setting dot
+        } else if (number == '.' && this.display.innerHTML && !this.display.innerHTML.includes('.')) {
             this.showChar(number);
-            this.afterSetAction = false;
-
-        } else {
+        // setting numbers
+        } else if (number != '.' && number != '+/-') {
             this.showChar(number);
         }
     }
 
     setAction(action) {
+        // set action and X
         if (this.display.innerHTML && !this.x) {
             this.action = action;
             this.x = this.display.innerHTML;
-
+        // change action
         } else if (this.display.innerHTML && this.x) {
             this.action = action;
-
         }
     }
 
@@ -70,7 +90,11 @@ class Calculator {
                 result = Number(this.x) / Number(this.y);
             }
             this.clearAll();
-            this.showChar(result);
+            if (!isNaN(result) && isFinite(result)) {
+                this.showChar(result);
+            } else {
+                this.showChar('Error');
+            }
         }
     }
 }   
@@ -102,11 +126,9 @@ function main() {
 }
 
 
-let buttons = document.querySelectorAll('.button');
-let deleteChar = document.querySelector('.delete-char');
+let buttons = document.querySelectorAll('.button , .delete-char');
 let calc = new Calculator;
 
-for (let btn of buttons) {
-    btn.onclick = main;
-}
-deleteChar.onclick = main;
+buttons.forEach(item => {
+    item.addEventListener('click', main);
+});
